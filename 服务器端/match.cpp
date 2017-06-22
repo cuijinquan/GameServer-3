@@ -9,6 +9,7 @@
 #include "string"  
 #include<pthread.h>
 #include"Server.h"
+#include"Login.h"
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib, "pthreadVC2.lib")
 #pragma comment(lib,"Msimg32.lib")
@@ -16,7 +17,7 @@
 #define MAX 1024
 //define host IP and usable port.  
 #define HOST_IP 127.0.0.1  
-#define MATCH_HOST_PORT 8081    //匹配所用套接字和游戏用的套接字不是同一个
+#define MATCH_HOST_PORT 8081    //匹配所用套接字和游戏用的套接字不是同一个，匹配系统用的8081，游戏系统用的8080
 #define OK_STR "Conn_Ok"
 #define THANKS "你已经成功连接服务器"
 #define MATCH_STR "NEED_MATCH"  //等待匹配字符串，作为标识
@@ -27,7 +28,10 @@ Room GameRoom(room_thread);           //游戏房间，全局变量，测试用，实际不能用全
 void * TransMessage(void *hi);             //为游戏服务的转发消息函数
 void MatchClient()           //匹配玩家，达到4个玩家，就创建一个房间，然后开始游戏
 {
-	
+	int JudgeData;            //判断数据包数据类型的标识符
+	int LoginMark; 
+	char Data1[8];
+	char Data2[8];
 	SOCKADDR_IN addr_Srv;
 	SOCKET Match_socServer;
 	char recvBuf[100];  //收到消息的缓冲区
@@ -67,20 +71,36 @@ void MatchClient()           //匹配玩家，达到4个玩家，就创建一个房间，然后开始游
 
 	//bind socket to  the host  
 	bind(Match_socServer, (SOCKADDR*)&addr_Srv, sizeof(SOCKADDR));
-	while (client_num < true)
+	while (true)        //设置好套接字开始主循环接收消息
 	{
 		while (client_num < player)         //凑齐4人，开始游戏
 		{
 			recvfrom(Match_socServer, recvBuf, 100, 0, (SOCKADDR*)&in_addr, &fromlen);        //读取消息到缓冲区
-																						//if (strcmp(recvBuf, OK_STR) == 0)                 //收到链接成功的消息,写入玩家地址
+			JudgeData = Analy_Str(recvBuf,Data1,Data2);                    //收到消息，解包，获取数据类型
+			
+		                                    //收到链接成功的消息,写入玩家地址
+			if (JudgeData == 1)                //表示收到的是用户名和密码
+			{
+				LoginMark = Login(Data1, Data2);
+				if (LoginMark == 1)         //标识登录成功
+				{
+					the_addr_Clt[client_num] = in_addr;             //登记IP
+					client_num++;
+
+					sendto(Match_socServer, THANKS, strlen(THANKS) + 1, 0, (SOCKADDR*)&in_addr, sizeof(SOCKADDR));
+				}
+			}
+			
 			printf("buf: %s\n", recvBuf);
 			//	this->addr_Clt[client_num] = in_addr;
+			/*
 			if (strcmp(recvBuf, OK_STR) == 0)
 			{
-				the_addr_Clt[client_num] = in_addr;
+				the_addr_Clt[client_num] = in_addr;             //登记IP
 				client_num++;
 			}
 			sendto(Match_socServer, THANKS, strlen(THANKS) + 1, 0, (SOCKADDR*)&in_addr, sizeof(SOCKADDR));
+			*/
 		}
 		
 		room_num++;
@@ -88,7 +108,7 @@ void MatchClient()           //匹配玩家，达到4个玩家，就创建一个房间，然后开始游
 		pthread_t TransThread;                //创建线程为此游戏房间服务
 		pthread_create(&TransThread, NULL, TransMessage,0 );
 	//	GameRoom.Rece_SendMe();
-		//GameRoom.Rece_SendMe();
+		//GameRoom.Rece_SendMe();          //线程终止方式为异步
 		client_num = 0;
 	}
 }

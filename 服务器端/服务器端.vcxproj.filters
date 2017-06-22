@@ -21,6 +21,9 @@
     <ClInclude Include="match.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="Login.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -30,6 +33,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="match.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Login.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

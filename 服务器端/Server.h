@@ -17,4 +17,5 @@ public:
 	void Rece_SendMe();             //接收消息和转发
 };
 
+enum Data_type{UserNam,PassWor,Operate,EndGame,StartGa};    //为了方便识别，都为7字符，
 #endif

@@ -1,4 +1,6 @@
 ﻿  match.cpp
-g:\专业课程学习\tank\服务器端\服务器端\match.cpp(69): warning C4804: “<”: 在操作中使用类型“bool”不安全
+  Login.cpp
+  正在生成代码...
+g:\专业课程学习\tank\服务器端\服务器端\login.cpp(166): warning C4715: “Analy_Str”: 不是所有的控件路径都返回值
   服务器端.vcxproj -> G:\专业课程学习\Tank\服务器端\Debug\服务器端.exe
   服务器端.vcxproj -> G:\专业课程学习\Tank\服务器端\Debug\服务器端.pdb (Partial PDB)
