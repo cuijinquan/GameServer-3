@@ -18,17 +18,19 @@ int Select(char *UserName, char *Result)
 	char temp[100];       //临时变量，用于存储查询的部分结果
 	_RecordsetPtr pRst;
 	char sqlcommand[1024];
-	strcpy_s(sqlcommand, "select * from table1 where UserName='");
+	strcpy_s(sqlcommand, "select PassWord from Players where UserName='");
 	strcat_s(sqlcommand, UserName);
 	strcat_s(sqlcommand, "';");
 	//_RecordsetPtr pRst;
 	_ConnectionPtr  sqlSp;
-	_bstr_t strConnect = "Provider = SQLOLEDB.1; Integrated Security = SSPI; Persist Security Info = False; Initial Catalog = MyGame; Data Source = .";//连接数据库字符串
+	_bstr_t strConnect = "Provider=SQLOLEDB.1;Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=MyGame;Data Source=.";
+	//连接数据库字符串
 																																					 //初始化COM库  
 	::CoInitialize(NULL);
 	//添加一个指向Connection对象的指针m_pConnection  
 	_ConnectionPtr m_pConnection(__uuidof(Connection));
 	//创键Connection对象  
+	cout << "用户 "<<UserName << endl;
 	if (!(m_pConnection.CreateInstance(__uuidof(Connection))))
 	{
 		cout << "创键Connection对象时出错\n";
@@ -38,18 +40,22 @@ int Select(char *UserName, char *Result)
 	{
 		//连接数据库  
 		m_pConnection->Open(strConnect, "", "", adModeUnknown);
+		
 	}
 	catch (_com_error e)
 	{
 		cout << "连接数据库时出错\n ";
 		cout << e.Description();
+		
 		cin.get();
 		return 1;
 	}
 	try                                   //将查询到的结果存储在记录集
 	{
+		
 		pRst = m_pConnection->Execute(sqlcommand, NULL, adCmdText);
 		//执行SQL： select * from Table_BB 
+		
 		if (!pRst->BOF)
 		{
 			pRst->MoveFirst();
@@ -108,7 +114,7 @@ int Select(char *UserName, char *Result)
 		return 0;
 	}
 	m_pConnection->Close();
-	printf("成功\n");
+	//printf("成功\n");
 
 	//释放程序占用的COM 资源  
 	::CoUninitialize();
@@ -119,7 +125,9 @@ int Select(char *UserName, char *Result)
 int  Login(char *UserName, char *PassWord)
 {
 	char Result[LENGTH];
-	Select(UserName, Result);
+	
+	Select(UserName, Result); //在数据库中找出密码
+
 	if (strcmp(PassWord, Result) == 0)
 	{
 		return 0;                           //返回0代表密码验证成功
@@ -129,15 +137,16 @@ int  Login(char *UserName, char *PassWord)
 }
 
 int Analy_Str(char *Recv,char *ReData1,char *ReData2) //recv表示接收到待分析的数据包，Redata1和2分别表示分析返回的数据。
-{
-	char temp[4][8];
+{                             //这个函数暂时有问题，拆包函数没写好，另外字符串长度问题，‘\0’是否占空间等等也没处理好
+	char temp[4][8];           //此外，客户端封装协议也没写好！
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 8; j++)
 		{
 			temp[i][j] = Recv[i * 8 + j];           //把数据包截取成4段，写进分析数组
-		}
+		}                       //这里截取有问题
 	}
+	cout << "temp1" << temp[1] << endl;
 	if (strcmp(temp[0], "&UserNam") == 0)
 	{  
 		strcpy_s(ReData1,8,temp[1]);
@@ -163,4 +172,5 @@ int Analy_Str(char *Recv,char *ReData1,char *ReData2) //recv表示接收到待分析的数
 		ReData2 = "\0";
 		return 4;                       //4表示收到的是结束游戏标志
 	}
+	
 }
